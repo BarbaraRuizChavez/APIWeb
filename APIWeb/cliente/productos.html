@@ -1,0 +1,325 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.datatables.net/3.1.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Modal: alta / edición -->
+    <div class="modal fade" id="registroProducto" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Producto</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="frmFegistroProducto" class="container mt-4 needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="ProductName" class="form-label">Nombre del Producto *</label>
+                            <input type="text" class="form-control" id="ProductName" name="ProductName" required
+                                   maxlength="40" minlength="5">
+                            <div class="invalid-feedback">
+                                Por favor, ingresa el nombre del producto (entre 5 y 40
+                                caracteres).
+                            </div>
+                            <div class="valid-feedback">Correcto</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="SupplierId" class="form-label">Proveedor</label>
+                                <select class="form-select" id="SupplierId" name="SupplierId">
+                                    <option value="0" selected>Selecciona un proveedor...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="CategoryId" class="form-label">Categoría</label>
+                                <select class="form-select" id="CategoryId" name="CategoryId">
+                                    <option value="0" selected>Selecciona una categoría...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="QuantityPerUnit" class="form-label">Cantidad por Unidad</label>
+                                <input type="text" class="form-control" id="QuantityPerUnit" name="QuantityPerUnit"
+                                       maxlength="20" placeholder="Ej. 24 botellas de 500ml">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="UnitPrice" class="form-label">Precio Unitario ($)</label>
+                                <input type="number" class="form-control" id="UnitPrice" name="UnitPrice" step="0.01"
+                                       min="0">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="UnitsInStock" class="form-label">Unidades en Stock</label>
+                                <input type="number" class="form-control" id="UnitsInStock" name="UnitsInStock" min="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="UnitsOnOrder" class="form-label">Unidades en Pedido</label>
+                                <input type="number" class="form-control" id="UnitsOnOrder" name="UnitsOnOrder" min="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="ReorderLevel" class="form-label">Nivel de Reorden</label>
+                                <input type="number" class="form-control" id="ReorderLevel" name="ReorderLevel" min="0">
+                            </div>
+                        </div>
+
+                        <div class="mb-4 form-check text-start">
+                            <input type="checkbox" class="form-check-input" id="Discontinued" name="Discontinued"
+                                   value="true">
+                            <label class="form-check-label" for="Discontinued">Producto Descontinuado</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" form="frmFegistroProducto">Guardar</button>
+                    <button type="reset" class="btn btn-warning" form="frmFegistroProducto">Limpiar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: confirmar eliminación -->
+    <div class="modal fade" id="eliminarProducto" tabindex="-1" aria-labelledby="eliminarTitulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="eliminarTitulo">Eliminar producto</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vas a eliminar este producto. Esta acción no se puede deshacer:</p>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Producto</dt>
+                        <dd class="col-sm-8 fw-bold" id="delNombre"></dd>
+                        <dt class="col-sm-4">Proveedor</dt>
+                        <dd class="col-sm-8" id="delProveedor"></dd>
+                        <dt class="col-sm-4">Categoría</dt>
+                        <dd class="col-sm-8" id="delCategoria"></dd>
+                        <dt class="col-sm-4">Precio</dt>
+                        <dd class="col-sm-8" id="delPrecio"></dd>
+                        <dt class="col-sm-4">Existencia</dt>
+                        <dd class="col-sm-8" id="delStock"></dd>
+                    </dl>
+                    <div id="delError" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Sí, eliminar</button>
+                    <button type="button" class="btn btn-secondary" id="btnCancelarEliminar"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Lista de productos</h1>
+
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#registroProducto">
+            Agregar
+        </button>
+
+        <table class="table table-striped" id="listaProductos" style="width:100%"></table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/3.1.4/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/3.1.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+                const API = 'https://localhost:7214/api';
+
+                // Escapa texto de la BD antes de meterlo en HTML (evita XSS)
+                const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                const dinero = n => '$' + Number(n || 0).toFixed(2);
+
+                // fetch con JSON; si la API responde error, lanza Error con su "mensaje"
+                async function api(path, { method = 'GET', body } = {}) {
+                    const res = await fetch(API + path, {
+                        method,
+                        headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+                        body: body !== undefined ? JSON.stringify(body) : undefined
+                    });
+                    const text = await res.text();
+                    let data = null;
+                    if (text) { try { data = JSON.parse(text); } catch { data = text; } }
+                    if (!res.ok) throw new Error((data && (data.mensaje || data.title)) || `Error ${res.status}`);
+                    return data;
+                }
+
+                cargarProductos();
+                cargarCategorias();
+                cargarProveedores();
+
+                var idProducto = 0;
+                var table;
+                var productos = [];
+                var productoAEliminar = null;
+
+                const form = document.querySelector('#frmFegistroProducto');
+
+                // "" -> null, "12" -> 12 (el JSON no puede mandar "" donde la API espera un número)
+                const entero = v => (v === '' || v == null) ? null : parseInt(v);
+                const decimal = v => (v === '' || v == null) ? null : parseFloat(v);
+
+                form.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    if (form.checkValidity()) {
+                        const data = Object.fromEntries(new FormData(form).entries());
+
+                        data.SupplierId = entero(data.SupplierId) || null;   // 0 ("Selecciona...") => sin proveedor
+                        data.CategoryId = entero(data.CategoryId) || null;
+                        data.UnitPrice = decimal(data.UnitPrice);
+                        data.UnitsInStock = entero(data.UnitsInStock);
+                        data.UnitsOnOrder = entero(data.UnitsOnOrder);
+                        data.ReorderLevel = entero(data.ReorderLevel);
+                        data.Discontinued = document.getElementById('Discontinued').checked;
+
+                        try {
+                            if (idProducto > 0) {
+                                data.ProductId = idProducto;
+                                await api(`/Products/${idProducto}`, { method: 'PUT', body: data });
+                            } else {
+                                await api('/Products', { method: 'POST', body: data });
+                            }
+                            alert('Producto guardado exitosamente');
+                            bootstrap.Modal.getInstance(document.getElementById('registroProducto')).hide();
+                            cargarProductos();
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('Error al guardar el producto: ' + error.message);
+                        }
+                    } else {
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+
+                async function cargarProductos() {
+                    try {
+                        productos = await api('/Products');
+                    } catch (error) { console.error('Error al cargar los productos:', error); return; }
+
+                    if (table) {
+                        table.clear().rows.add(productos).draw();
+                        return;
+                    }
+                    table = new DataTable('#listaProductos', {
+                        data: productos,
+                        columns: [
+                            { title: 'Producto', data: 'productName', render: v => esc(v) },
+                            { title: 'Proveedor', data: 'supplier', render: (d, t, row) => esc(row.supplier ? row.supplier.companyName : '') },
+                            { title: 'Categoría', data: 'category', render: (d, t, row) => esc(row.category ? row.category.categoryName : '') },
+                            { title: 'Precio', data: 'unitPrice' },
+                            { title: 'Existencia', data: 'unitsInStock' },
+                            { title: 'Activo', data: 'discontinued', render: (d, t, row) => row.discontinued ? 'NO' : 'SI' },
+                            {
+                                title: '', data: null, orderable: false, render: (d, t, row) => `
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#registroProducto" data-idproducto="${row.productId}"
+                                    aria-label="Editar ${esc(row.productName)}">Editar</button>
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#eliminarProducto" data-eliminar="${row.productId}"
+                                    aria-label="Eliminar ${esc(row.productName)}">Eliminar</button>`
+                            }
+                        ]
+                    });
+                }
+
+                async function cargarCategorias() {
+                    try {
+                        const data = await api('/Categories');
+                        const select = document.getElementById('CategoryId');
+                        data.forEach(c => select.append(new Option(c.categoryName, c.categoryId)));
+                    } catch (error) { console.error('Error al cargar las categorías:', error); }
+                }
+
+                async function cargarProveedores() {
+                    try {
+                        const data = await api('/Suppliers');
+                        const select = document.getElementById('SupplierId');
+                        data.forEach(p => select.append(new Option(p.companyName, p.supplierId)));
+                    } catch (error) { console.error('Error al cargar los proveedores:', error); }
+                }
+
+                // ---------- Modal alta / edición ----------
+                document.getElementById("registroProducto").addEventListener("show.bs.modal", async event => {
+                    const button = event.relatedTarget;
+                    const idParam = button ? button.getAttribute("data-idproducto") : null;
+                    idProducto = idParam ? parseInt(idParam) : 0;
+                    form.reset();
+                    form.classList.remove('was-validated');
+
+                    if (idProducto > 0) {
+                        try {
+                            const data = await api(`/Products/${idProducto}`);
+                            document.getElementById("ProductName").value = data.productName;
+                            document.getElementById("SupplierId").value = data.supplierId ?? 0;
+                            document.getElementById("CategoryId").value = data.categoryId ?? 0;
+                            document.getElementById("QuantityPerUnit").value = data.quantityPerUnit ?? '';
+                            document.getElementById("UnitPrice").value = data.unitPrice ?? '';
+                            document.getElementById("UnitsInStock").value = data.unitsInStock ?? '';
+                            document.getElementById("UnitsOnOrder").value = data.unitsOnOrder ?? '';
+                            document.getElementById("ReorderLevel").value = data.reorderLevel ?? '';
+                            document.getElementById("Discontinued").checked = !!data.discontinued;
+                        } catch (error) { console.error('Error al cargar el producto:', error); }
+                    }
+                });
+
+                // ---------- Modal eliminar ----------
+                const modalEliminar = document.getElementById('eliminarProducto');
+                const delError = document.getElementById('delError');
+
+                modalEliminar.addEventListener('show.bs.modal', event => {
+                    const id = parseInt(event.relatedTarget.getAttribute('data-eliminar'));
+                    productoAEliminar = productos.find(p => p.productId === id);
+                    if (!productoAEliminar) { event.preventDefault(); return; }
+
+                    // textContent (no innerHTML): el nombre viene de la BD y no debe interpretarse como HTML
+                    document.getElementById('delNombre').textContent = productoAEliminar.productName;
+                    document.getElementById('delProveedor').textContent = productoAEliminar.supplier?.companyName ?? '—';
+                    document.getElementById('delCategoria').textContent = productoAEliminar.category?.categoryName ?? '—';
+                    document.getElementById('delPrecio').textContent = dinero(productoAEliminar.unitPrice);
+                    document.getElementById('delStock').textContent = productoAEliminar.unitsInStock ?? 0;
+                    delError.classList.add('d-none');
+                });
+
+                // En una acción destructiva el foco empieza en "Cancelar".
+                modalEliminar.addEventListener('shown.bs.modal', () =>
+                    document.getElementById('btnCancelarEliminar').focus());
+
+                document.getElementById('btnConfirmarEliminar').addEventListener('click', async function () {
+                    if (!productoAEliminar) return;
+                    this.disabled = true;
+                    try {
+                        await api(`/Products/${productoAEliminar.productId}`, { method: 'DELETE' });
+                        bootstrap.Modal.getInstance(modalEliminar).hide();
+                        cargarProductos();
+                    } catch (error) {
+                        delError.textContent = error.message;   // p. ej. el 409 "aparece en N pedidos"
+                        delError.classList.remove('d-none');
+                    } finally {
+                        this.disabled = false;
+                    }
+                });
+    </script>
+</body>
+
+</html>
