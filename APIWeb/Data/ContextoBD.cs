@@ -253,5 +253,29 @@ public partial class ContextoBD : DbContext
         OnModelCreatingPartial(modelBuilder);
     }
 
+    public virtual DbSet<AppUser> AppUsers { get; set; }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AppUser>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PRIMARY");
+            entity.ToTable("app_users");
+
+            entity.HasIndex(e => e.Email, "UX_app_users_Email").IsUnique();
+            entity.HasIndex(e => e.GoogleSubject, "UX_app_users_Google").IsUnique();
+
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Email).HasMaxLength(120);
+            entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.Role).HasMaxLength(20);
+            entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.GoogleSubject).HasMaxLength(64);
+            entity.Property(e => e.SupplierId).HasColumnName("SupplierID");
+            entity.Property(e => e.CustomerId).HasMaxLength(5).HasColumnName("CustomerID");
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+        });
+    }
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
