@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.datatables.net/3.1.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Modal: alta / edición -->
+    <div class="modal fade" id="registroCliente" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Cliente</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="frmRegistroCliente" class="container mt-4 needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="CustomerId" class="form-label">Id del cliente *</label>
+                                <input type="text" class="form-control text-uppercase" id="CustomerId" name="CustomerId"
+                                       required maxlength="5" minlength="5" pattern="[A-Za-z0-9]{5}"
+                                       placeholder="Ej. ALFKI">
+                                <div class="invalid-feedback">
+                                    El id debe tener exactamente 5 letras o números.
+                                </div>
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label for="CompanyName" class="form-label">Empresa *</label>
+                                <input type="text" class="form-control" id="CompanyName" name="CompanyName" required
+                                       maxlength="40" minlength="3">
+                                <div class="invalid-feedback">
+                                    Ingresa el nombre de la empresa (entre 3 y 40 caracteres).
+                                </div>
+                                <div class="valid-feedback">Correcto</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ContactName" class="form-label">Nombre de contacto</label>
+                                <input type="text" class="form-control" id="ContactName" name="ContactName"
+                                       maxlength="30">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ContactTitle" class="form-label">Puesto del contacto</label>
+                                <input type="text" class="form-control" id="ContactTitle" name="ContactTitle"
+                                       maxlength="30">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Address" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="Address" name="Address" maxlength="60">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="City" class="form-label">Ciudad</label>
+                                <input type="text" class="form-control" id="City" name="City" maxlength="15">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="Region" class="form-label">Región</label>
+                                <input type="text" class="form-control" id="Region" name="Region" maxlength="15">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="PostalCode" class="form-label">Código postal</label>
+                                <input type="text" class="form-control" id="PostalCode" name="PostalCode"
+                                       maxlength="10">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="Country" class="form-label">País</label>
+                                <input type="text" class="form-control" id="Country" name="Country" maxlength="15">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Phone" class="form-label">Teléfono</label>
+                                <input type="text" class="form-control" id="Phone" name="Phone" maxlength="24">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Fax" class="form-label">Fax</label>
+                                <input type="text" class="form-control" id="Fax" name="Fax" maxlength="24">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" form="frmRegistroCliente">Guardar</button>
+                    <button type="reset" class="btn btn-warning" form="frmRegistroCliente">Limpiar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: confirmar eliminación -->
+    <div class="modal fade" id="eliminarCliente" tabindex="-1" aria-labelledby="eliminarTitulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="eliminarTitulo">Eliminar cliente</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vas a eliminar este cliente. Esta acción no se puede deshacer:</p>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Id</dt>
+                        <dd class="col-sm-8" id="delId"></dd>
+                        <dt class="col-sm-4">Empresa</dt>
+                        <dd class="col-sm-8 fw-bold" id="delEmpresa"></dd>
+                        <dt class="col-sm-4">Contacto</dt>
+                        <dd class="col-sm-8" id="delContacto"></dd>
+                        <dt class="col-sm-4">Ciudad</dt>
+                        <dd class="col-sm-8" id="delCiudad"></dd>
+                        <dt class="col-sm-4">País</dt>
+                        <dd class="col-sm-8" id="delPais"></dd>
+                    </dl>
+                    <div id="delError" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Sí, eliminar</button>
+                    <button type="button" class="btn btn-secondary" id="btnCancelarEliminar"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Lista de clientes</h1>
+
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#registroCliente">
+            Agregar
+        </button>
+
+        <table class="table table-striped" id="listaClientes" style="width:100%"></table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/3.1.4/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/3.1.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+// @ts-nocheck
+(function () {
+            'use strict';
+
+            const API = 'https://localhost:7214/api';
+
+            // Escapa texto de la BD antes de meterlo en HTML (evita XSS)
+            function esc(v) {
+                return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            // fetch con JSON; si la API responde error, lanza Error con su "mensaje"
+            async function api(path, opciones) {
+                const o = opciones || {};
+                const method = o.method || 'GET';
+                const body = o.body;
+                const res = await fetch(API + path, {
+                    method: method,
+                    headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+                    body: body !== undefined ? JSON.stringify(body) : undefined
+                });
+                const text = await res.text();
+                let data = null;
+                if (text) {
+                    try { data = JSON.parse(text); } catch (e) { data = text; }
+                }
+                if (!res.ok) {
+                    throw new Error((data && (data.mensaje || data.title)) || ('Error ' + res.status));
+                }
+                return data;
+            }
+
+            let idCliente = '';          // '' = alta nueva; con valor = edición
+            let table = null;
+            let clientes = [];
+            let clienteAEliminar = null;
+
+            const form = document.querySelector('#frmRegistroCliente');
+            const campoId = document.getElementById('CustomerId');
+            const modalRegistro = document.getElementById('registroCliente');
+            const modalEliminar = document.getElementById('eliminarCliente');
+            const delError = document.getElementById('delError');
+
+            // Campos de texto (todos menos el id) que viajan a la API
+            const camposTexto = ['CompanyName', 'ContactName', 'ContactTitle', 'Address',
+                'City', 'Region', 'PostalCode', 'Country', 'Phone', 'Fax'];
+
+            function clave(c) { return c.charAt(0).toLowerCase() + c.slice(1); }
+
+            // "" -> null (la BD guarda null en los opcionales, no cadenas vacías)
+            function texto(v) {
+                return (v == null || String(v).trim() === '') ? null : String(v).trim();
+            }
+
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                if (form.checkValidity()) {
+                    const data = { customerId: campoId.value.trim().toUpperCase() };
+                    camposTexto.forEach(function (c) {
+                        data[clave(c)] = texto(document.getElementById(c).value);
+                    });
+
+                    try {
+                        if (idCliente !== '') {
+                            await api('/Customers/' + encodeURIComponent(idCliente), { method: 'PUT', body: data });
+                        } else {
+                            await api('/Customers', { method: 'POST', body: data });
+                        }
+                        alert('Cliente guardado exitosamente');
+                        bootstrap.Modal.getInstance(modalRegistro).hide();
+                        cargarClientes();
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error al guardar el cliente: ' + error.message);
+                    }
+                } else {
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+
+            async function cargarClientes() {
+                try {
+                    clientes = await api('/Customers');
+                } catch (error) {
+                    console.error('Error al cargar los clientes:', error);
+                    return;
+                }
+
+                if (table) {
+                    table.clear().rows.add(clientes).draw();
+                    return;
+                }
+                table = new DataTable('#listaClientes', {
+                    data: clientes,
+                    columns: [
+                        { title: 'Id', data: 'customerId', render: function (v) { return esc(v); } },
+                        { title: 'Empresa', data: 'companyName', render: function (v) { return esc(v); } },
+                        { title: 'Contacto', data: 'contactName', render: function (v) { return esc(v); } },
+                        { title: 'Ciudad', data: 'city', render: function (v) { return esc(v); } },
+                        { title: 'País', data: 'country', render: function (v) { return esc(v); } },
+                        { title: 'Teléfono', data: 'phone', render: function (v) { return esc(v); } },
+                        {
+                            title: '', data: null, orderable: false,
+                            render: function (d, t, row) {
+                                return '<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"' +
+                                    ' data-bs-target="#registroCliente" data-idcliente="' + esc(row.customerId) + '"' +
+                                    ' aria-label="Editar ' + esc(row.companyName) + '">Editar</button> ' +
+                                    '<button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"' +
+                                    ' data-bs-target="#eliminarCliente" data-eliminar="' + esc(row.customerId) + '"' +
+                                    ' aria-label="Eliminar ' + esc(row.companyName) + '">Eliminar</button>';
+                            }
+                        }
+                    ]
+                });
+            }
+
+            // ---------- Modal alta / edición ----------
+            modalRegistro.addEventListener('show.bs.modal', async function (event) {
+                const button = event.relatedTarget;
+                idCliente = button ? (button.getAttribute('data-idcliente') || '') : '';
+                form.reset();
+                form.classList.remove('was-validated');
+                campoId.readOnly = idCliente !== '';   // el id no se cambia al editar
+
+                if (idCliente !== '') {
+                    try {
+                        const data = await api('/Customers/' + encodeURIComponent(idCliente));
+                        campoId.value = data.customerId;
+                        camposTexto.forEach(function (c) {
+                            const valor = data[clave(c)];
+                            document.getElementById(c).value = valor == null ? '' : valor;
+                        });
+                    } catch (error) {
+                        console.error('Error al cargar el cliente:', error);
+                    }
+                }
+            });
+
+            // ---------- Modal eliminar ----------
+            modalEliminar.addEventListener('show.bs.modal', function (event) {
+                const id = event.relatedTarget.getAttribute('data-eliminar');
+                clienteAEliminar = clientes.find(function (c) { return c.customerId === id; });
+                if (!clienteAEliminar) { event.preventDefault(); return; }
+
+                // textContent (no innerHTML): los datos vienen de la BD y no deben interpretarse como HTML
+                document.getElementById('delId').textContent = clienteAEliminar.customerId;
+                document.getElementById('delEmpresa').textContent = clienteAEliminar.companyName;
+                document.getElementById('delContacto').textContent = clienteAEliminar.contactName || '—';
+                document.getElementById('delCiudad').textContent = clienteAEliminar.city || '—';
+                document.getElementById('delPais').textContent = clienteAEliminar.country || '—';
+                delError.classList.add('d-none');
+            });
+
+            // En una acción destructiva el foco empieza en "Cancelar".
+            modalEliminar.addEventListener('shown.bs.modal', function () {
+                document.getElementById('btnCancelarEliminar').focus();
+            });
+
+            const btnConfirmar = document.getElementById('btnConfirmarEliminar');
+            btnConfirmar.addEventListener('click', async function () {
+                if (!clienteAEliminar) return;
+                btnConfirmar.disabled = true;
+                try {
+                    await api('/Customers/' + encodeURIComponent(clienteAEliminar.customerId), { method: 'DELETE' });
+                    bootstrap.Modal.getInstance(modalEliminar).hide();
+                    cargarClientes();
+                } catch (error) {
+                    delError.textContent = error.message;   // p. ej. el 409 "tiene N pedido(s)"
+                    delError.classList.remove('d-none');
+                } finally {
+                    btnConfirmar.disabled = false;
+                }
+            });
+
+            cargarClientes();
+})();
+    </script>
+</body>
+
+</html>
